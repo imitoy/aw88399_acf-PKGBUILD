@@ -1,0 +1,72 @@
+name: Build Arch Linux Package
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'PKGBUILD'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    container:
+      image: archlinux:latest
+      options: --privileged
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize System & Dependencies
+        run: |
+          pacman -Syu --noconfirm base-devel git github-cli
+          useradd builder -m
+          passwd -d builder
+          printf 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+          chown -R builder:builder .
+
+      - name: Build Package
+        run: |
+          sudo -u builder makepkg -sc --noconfirm
+
+      - name: Extract version from PKGBUILD
+        id: get_version
+        run: |
+          source ./PKGBUILD
+          echo "VERSION=${pkgver}-${pkgrel}" >> $GITHUB_OUTPUT
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          files: |
+            *.pkg.tar.zst
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger GitHub Pages pacman repo update
+        env:
+          GH_TOKEN: ${{ secrets.PACMAN_REPO_TOKEN }}
+          PAGES_REPO_OWNER: ${{ vars.PAGES_REPO_OWNER }}
+        run: |
+          set -euo pipefail
+          PAGES_REPO_OWNER="${PAGES_REPO_OWNER:-imitoy}"
+          PAGES_REPO="linux-legion-audio-fix"
+          if ! gh repo view "${PAGES_REPO_OWNER}/${PAGES_REPO}" >/dev/null 2>&1; then
+            gh repo create "${PAGES_REPO_OWNER}/${PAGES_REPO}" --public --confirm
+            git clone "https://github.com/${PAGES_REPO_OWNER}/${PAGES_REPO}.git" pages-repo
+            cd pages-repo
+            mkdir -p .github/workflows
+            cp "${GITHUB_WORKSPACE}/.github/pages-deploy.yml" .github/workflows/deploy.yml
+            git add -A
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -m "ci: init pacman repo deploy workflow" || true
+            git push origin main || true
+            cd .. && rm -rf pages-repo
+            gh api "repos/${PAGES_REPO_OWNER}/${PAGES_REPO}/pages" -X PUT -f "build_type=workflow" || true
+          fi
+          gh api "repos/${PAGES_REPO_OWNER}/${PAGES_REPO}/dispatches" -X POST \
+            -f "event_type=update-packages" || true

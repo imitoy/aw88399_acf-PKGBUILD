@@ -1,6 +1,6 @@
 # Introduction
 
-This repository provides an aw88399-acf firmware package build script for Arch Linux to fix Linux audio on the Lenovo Legion Pro 7i Gen 10 (16IAX10H) and similar devices.
+This repository provides an aw88399-acf firmware package build script for Arch Linux to fix audio on the Lenovo Legion Pro 7i Gen 10 (16IAX10H) and similar devices.
 
 For pre-built Arch packages, please refer to [imitoy/linux-legion-audio-fix](https://github.com/imitoy/linux-legion-audio-fix).
 

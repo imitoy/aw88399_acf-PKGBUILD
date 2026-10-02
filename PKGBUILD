@@ -17,5 +17,12 @@ sha256sums=(
 )
 
 package() {
-  install -Dm644 "$srcdir/aw88399_acf.bin" "$pkgdir/usr/lib/firmware/aw88399_acf.bin"
+  install -Dm644 "$srcdir/aw88399_acf.bin" "$pkgdir/usr/lib/firmware/awinic/aw88399_acf_17aa3906.bin"
+  install -Dm644 "$srcdir/aw88399_acf.bin" "$pkgdir/usr/lib/firmware/awinic/aw88399_acf_17aa3907.bin"
+  install -Dm644 "$srcdir/aw88399_acf.bin" "$pkgdir/usr/lib/firmware/awinic/aw88399_acf_17aa3927.bin"
+  install -Dm644 "$srcdir/aw88399_acf.bin" "$pkgdir/usr/lib/firmware/awinic/aw88399_acf_17aa3928.bin"
+  install -Dm644 "$srcdir/aw88399_acf.bin" "$pkgdir/usr/lib/firmware/awinic/aw88399_acf_17aa3936.bin"
+  install -Dm644 "$srcdir/aw88399_acf.bin" "$pkgdir/usr/lib/firmware/awinic/aw88399_acf_17aa3937.bin"
+  install -Dm644 "$srcdir/aw88399_acf.bin" "$pkgdir/usr/lib/firmware/awinic/aw88399_acf_17aa3938.bin"
+  install -Dm644 "$srcdir/aw88399_acf.bin" "$pkgdir/usr/lib/firmware/awinic/aw88399_acf_17aa3939.bin"
 }
